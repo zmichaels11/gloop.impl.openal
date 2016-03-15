@@ -19,4 +19,19 @@ final class AL10Source implements Source{
         return sourceId != -1;
     }
     
+    @Override
+    public boolean equals(Object other) {
+        if(other instanceof AL10Source) {
+            return this.sourceId == ((AL10Source) other).sourceId;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + this.sourceId;
+        return hash;
+    }
 }
