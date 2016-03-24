@@ -36,7 +36,7 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
             device.context.destroy();
             device.context = null;
             device.caps = null;
-            device.handle.close();
+            device.handle.destroy();            
             device.handle = null;
         }
     }
