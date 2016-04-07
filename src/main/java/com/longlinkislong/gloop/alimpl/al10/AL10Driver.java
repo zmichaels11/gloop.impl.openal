@@ -21,6 +21,11 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
         AL10AuxiliaryEffectSlot, AL10Effect, AL10Filter> {
 
     @Override
+    public int sourceGetMaxAuxiliaryEffectSlotSends() {
+        return 0;
+    }
+    
+    @Override
     public void distanceModelApply(int model) {
         AL10.alDistanceModel(model);
     }

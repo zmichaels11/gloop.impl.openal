@@ -22,6 +22,13 @@ import org.lwjgl.system.MemoryUtil;
  */
 final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTListener, ALSOFTSource, ALSOFTAuxiliaryEffectSlot, ALSOFTEffect, ALSOFTFilter> {
 
+    private final int maxAuxiliarySends = Integer.getInteger("com.longlinkislong.gloop.alsoftdriver.max_auxiliary_sends", 4);
+    
+    @Override
+    public int sourceGetMaxAuxiliaryEffectSlotSends() {
+        return this.maxAuxiliarySends;
+    }
+    
     @Override
     public ALSOFTAuxiliaryEffectSlot auxiliaryEffectSlotCreate() {
         final ALSOFTAuxiliaryEffectSlot effectSlot = new ALSOFTAuxiliaryEffectSlot();
@@ -168,7 +175,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
         final IntBuffer attribs = MemoryUtil.memAllocInt(2);
         
         attribs.put(EXTEfx.ALC_MAX_AUXILIARY_SENDS);
-        attribs.put(4);
+        attribs.put(this.maxAuxiliarySends);
         attribs.flip();
         
         device.context = ALContext.create(device.handle, attribs);
