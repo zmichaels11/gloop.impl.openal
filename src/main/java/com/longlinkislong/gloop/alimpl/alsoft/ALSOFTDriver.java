@@ -8,6 +8,7 @@ package com.longlinkislong.gloop.alimpl.alsoft;
 import com.longlinkislong.gloop.alspi.Driver;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALContext;
@@ -160,11 +161,20 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     @Override
     public ALSOFTDevice deviceCreate() {
         final ALSOFTDevice device = new ALSOFTDevice();
-
+        
         device.handle = ALDevice.create();
         device.caps = device.handle.getCapabilities();
-        device.context = ALContext.create(device.handle);
+        
+        final IntBuffer attribs = MemoryUtil.memAllocInt(2);
+        
+        attribs.put(EXTEfx.ALC_MAX_AUXILIARY_SENDS);
+        attribs.put(4);
+        attribs.flip();
+        
+        device.context = ALContext.create(device.handle, attribs);
 
+        MemoryUtil.memFree(attribs);
+        
         return device;
     }
 
