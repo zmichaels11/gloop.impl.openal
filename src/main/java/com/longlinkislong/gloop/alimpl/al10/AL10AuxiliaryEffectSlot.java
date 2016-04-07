@@ -1,0 +1,21 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.longlinkislong.gloop.alimpl.al10;
+
+import com.longlinkislong.gloop.alspi.AuxiliaryEffectSlot;
+
+/**
+ *
+ * @author zmichaels
+ */
+final class AL10AuxiliaryEffectSlot implements AuxiliaryEffectSlot {
+
+    @Override
+    public boolean isValid() {
+        return false;
+    }
+    
+}

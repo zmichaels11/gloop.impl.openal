@@ -17,7 +17,8 @@ import org.lwjgl.system.MemoryUtil;
  *
  * @author zmichaels
  */
-final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, AL10Source> {
+final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, AL10Source,
+        AL10AuxiliaryEffectSlot, AL10Effect, AL10Filter> {
 
     @Override
     public void distanceModelApply(int model) {
