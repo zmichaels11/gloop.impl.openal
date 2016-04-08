@@ -172,10 +172,11 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
         device.handle = ALDevice.create();
         device.caps = device.handle.getCapabilities();
         
-        final IntBuffer attribs = MemoryUtil.memAllocInt(2);
+        final IntBuffer attribs = MemoryUtil.memAllocInt(3);
         
         attribs.put(EXTEfx.ALC_MAX_AUXILIARY_SENDS);
         attribs.put(this.maxAuxiliarySends);
+        attribs.put(0);
         attribs.flip();
         
         device.context = ALContext.create(device.handle, attribs);
