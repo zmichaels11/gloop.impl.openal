@@ -14,6 +14,7 @@ import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.EXTEfx;
 import org.lwjgl.system.MemoryUtil;
+import static org.lwjgl.system.MemoryUtil.NULL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,8 +171,11 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     public ALSOFTDevice deviceCreate() {
         final ALSOFTDevice device = new ALSOFTDevice();
 
-        device.deviceId = ALC10.alcOpenDevice((ByteBuffer) null);
-        LOGGER.trace("Opened ALC device: {}", device.deviceId);
+
+        final String defaultDevice = ALC10.alcGetString(NULL, ALC10.ALC_DEFAULT_DEVICE_SPECIFIER);
+
+        device.deviceId = ALC10.alcOpenDevice(defaultDevice);
+        LOGGER.trace("Opened ALC device: [{}] handle: [{}]", defaultDevice, device.deviceId);
 
         final IntBuffer attribs = MemoryUtil.memAllocInt(3);
 
