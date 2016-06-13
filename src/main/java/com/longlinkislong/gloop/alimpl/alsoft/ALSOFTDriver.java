@@ -14,13 +14,15 @@ import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.EXTEfx;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author zmichaels
  */
 final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTListener, ALSOFTSource, ALSOFTAuxiliaryEffectSlot, ALSOFTEffect, ALSOFTFilter> {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger("ALSoftDriver");
     private final int maxAuxiliarySends = Integer.getInteger("com.longlinkislong.gloop.alsoftdriver.max_auxiliary_sends", 4);
 
     @Override
@@ -169,6 +171,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
         final ALSOFTDevice device = new ALSOFTDevice();
 
         device.deviceId = ALC10.alcOpenDevice((ByteBuffer) null);
+        LOGGER.trace("Opened ALC device: {}", device.deviceId);
 
         final IntBuffer attribs = MemoryUtil.memAllocInt(3);
 
@@ -179,7 +182,10 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
             attribs.flip();
 
             device.contextId = ALC10.alcCreateContext(device.deviceId, attribs);
-            ALC10.alcMakeContextCurrent(device.contextId);
+
+            if(!ALC10.alcMakeContextCurrent(device.contextId)) {
+                LOGGER.error("Initializing OpenAL failed with error: {}", AL10.alGetError());
+            }
         } finally {
             MemoryUtil.memFree(attribs);
         }
