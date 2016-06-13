@@ -9,8 +9,10 @@ import com.longlinkislong.gloop.alspi.Driver;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
+import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.EXTEfx;
 import org.lwjgl.system.MemoryUtil;
@@ -174,6 +176,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
 
         final String defaultDevice = ALC10.alcGetString(NULL, ALC10.ALC_DEFAULT_DEVICE_SPECIFIER);
 
+        device.alcCaps = ALC.createCapabilities(device.deviceId);
         device.deviceId = ALC10.alcOpenDevice(defaultDevice);
         LOGGER.trace("Opened ALC device: [{}] handle: [{}]", defaultDevice, device.deviceId);
 
@@ -189,6 +192,8 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
 
             if(!ALC10.alcMakeContextCurrent(device.contextId)) {
                 LOGGER.error("Initializing OpenAL failed with error: {}", AL10.alGetError());
+            } else {                
+                device.alCaps = AL.createCapabilities(device.alcCaps);
             }
         } finally {
             MemoryUtil.memFree(attribs);

@@ -6,6 +6,8 @@
 package com.longlinkislong.gloop.alimpl.alsoft;
 
 import com.longlinkislong.gloop.alspi.Device;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALCapabilities;
 
 /**
  *
@@ -14,6 +16,8 @@ import com.longlinkislong.gloop.alspi.Device;
 final class ALSOFTDevice implements Device {
     long deviceId = -1;
     long contextId = -1;
+    ALCCapabilities alcCaps = null;
+    ALCapabilities alCaps = null;
     
     @Override
     public boolean isValid() {
