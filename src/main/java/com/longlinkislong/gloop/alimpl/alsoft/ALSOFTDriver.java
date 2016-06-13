@@ -175,9 +175,10 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
 
 
         final String defaultDevice = ALC10.alcGetString(NULL, ALC10.ALC_DEFAULT_DEVICE_SPECIFIER);
-
-        device.alcCaps = ALC.createCapabilities(device.deviceId);
+        
         device.deviceId = ALC10.alcOpenDevice(defaultDevice);
+        device.alcCaps = ALC.createCapabilities(device.deviceId);
+        
         LOGGER.trace("Opened ALC device: [{}] handle: [{}]", defaultDevice, device.deviceId);
 
         final IntBuffer attribs = MemoryUtil.memAllocInt(3);
