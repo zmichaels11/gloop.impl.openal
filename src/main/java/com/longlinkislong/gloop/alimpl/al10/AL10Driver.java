@@ -17,26 +17,25 @@ import org.lwjgl.system.MemoryUtil;
  *
  * @author zmichaels
  */
-final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, AL10Source,
-        AL10AuxiliaryEffectSlot, AL10Effect, AL10Filter> {
+final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, AL10Source, AL10AuxiliaryEffectSlot, AL10Effect, AL10Filter> {
 
     @Override
     public int sourceGetMaxAuxiliaryEffectSlotSends() {
         return 0;
     }
-    
+
     @Override
     public void distanceModelApply(int model) {
         AL10.alDistanceModel(model);
     }
-        
+
     @Override
     public void sourceSetDistance(final AL10Source src, final float relative, final float rolloff, final float max) {
         AL10.alSourcef(src.sourceId, AL10.AL_REFERENCE_DISTANCE, relative);
         AL10.alSourcef(src.sourceId, AL10.AL_MAX_DISTANCE, max);
         AL10.alSourcef(src.sourceId, AL10.AL_ROLLOFF_FACTOR, rolloff);
     }
-    
+
     @Override
     public AL10Device deviceCreate() {
         final AL10Device device = new AL10Device();
@@ -54,7 +53,7 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
             device.context.destroy();
             device.context = null;
             device.caps = null;
-            device.handle.destroy();            
+            device.handle.destroy();
             device.handle = null;
         }
     }
@@ -102,16 +101,18 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     public void listenerSetOrientation(AL10Listener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {
         final FloatBuffer values = MemoryUtil.memAllocFloat(6);
 
-        values.put(0, atX);
-        values.put(1, atY);
-        values.put(2, atZ);
-        values.put(3, upX);
-        values.put(4, upY);
-        values.put(5, upZ);
+        try {
+            values.put(0, atX);
+            values.put(1, atY);
+            values.put(2, atZ);
+            values.put(3, upX);
+            values.put(4, upY);
+            values.put(5, upZ);
 
-        AL10.alListenerfv(AL10.AL_ORIENTATION, values);
-
-        MemoryUtil.memFree(values);
+            AL10.alListenerfv(AL10.AL_ORIENTATION, values);
+        } finally {
+            MemoryUtil.memFree(values);
+        }
     }
 
     @Override
@@ -180,13 +181,16 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     public void sourceSetPosition(AL10Source source, float x, float y, float z) {
         final FloatBuffer values = MemoryUtil.memAllocFloat(3);
 
-        values.put(0, x);
-        values.put(1, y);
-        values.put(2, z);
+        try {
+            values.put(0, x);
+            values.put(1, y);
+            values.put(2, z);
 
-        //AL10.alSource3f(source.sourceId, AL10.AL_POSITION, x, y, z);
-        AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
-        MemoryUtil.memFree(values);
+            //AL10.alSource3f(source.sourceId, AL10.AL_POSITION, x, y, z);
+            AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
+        } finally {
+            MemoryUtil.memFree(values);
+        }
     }
 
     @Override
@@ -197,7 +201,7 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     @Override
     public void sourcePlay(AL10Source source) {
         AL10.alSourcePlay(source.sourceId);
-    }   
+    }
 
     @Override
     public void sourceSetBuffer(AL10Source source, AL10Buffer buffer) {
@@ -208,11 +212,11 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     public void sourceSetLooping(AL10Source source, boolean loop) {
         AL10.alSourcei(source.sourceId, AL10.AL_LOOPING, loop ? AL10.AL_TRUE : AL10.AL_FALSE);
     }
-    
+
     @Override
     public void sourceSetCone(final AL10Source src, final float innerAngle, final float outerAngle, final float outerGain) {
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_INNER_ANGLE, innerAngle);
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_ANGLE, outerAngle);
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_GAIN, outerGain);
-    }        
+    }
 }

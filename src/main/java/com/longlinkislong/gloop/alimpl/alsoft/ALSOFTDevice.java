@@ -5,7 +5,6 @@
  */
 package com.longlinkislong.gloop.alimpl.alsoft;
 
-import com.longlinkislong.gloop.alimpl.al10.*;
 import com.longlinkislong.gloop.alspi.Device;
 import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.openal.ALContext;

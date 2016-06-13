@@ -23,12 +23,12 @@ import org.lwjgl.system.MemoryUtil;
 final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTListener, ALSOFTSource, ALSOFTAuxiliaryEffectSlot, ALSOFTEffect, ALSOFTFilter> {
 
     private final int maxAuxiliarySends = Integer.getInteger("com.longlinkislong.gloop.alsoftdriver.max_auxiliary_sends", 4);
-    
+
     @Override
     public int sourceGetMaxAuxiliaryEffectSlotSends() {
         return this.maxAuxiliarySends;
     }
-    
+
     @Override
     public ALSOFTAuxiliaryEffectSlot auxiliaryEffectSlotCreate() {
         final ALSOFTAuxiliaryEffectSlot effectSlot = new ALSOFTAuxiliaryEffectSlot();
@@ -58,10 +58,10 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
 
     @Override
     public void sourceSendAuxiliaryEffectSlot(
-            ALSOFTSource source, 
-            ALSOFTAuxiliaryEffectSlot slot, 
+            ALSOFTSource source,
+            ALSOFTAuxiliaryEffectSlot slot,
             int send) {
-        
+
         AL11.alSource3i(
                 source.sourceId,
                 EXTEfx.AL_AUXILIARY_SEND_FILTER,
@@ -75,7 +75,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
             ALSOFTAuxiliaryEffectSlot slot,
             int send,
             ALSOFTFilter filter) {
-        
+
         AL11.alSource3i(
                 source.sourceId,
                 EXTEfx.AL_AUXILIARY_SEND_FILTER,
@@ -83,71 +83,71 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
                 send,
                 filter.filterId);
     }
-    
+
     @Override
     public void sourceSendDisable(ALSOFTSource source, int send) {
         AL11.alSource3i(source.sourceId, EXTEfx.AL_AUXILIARY_SEND_FILTER, EXTEfx.AL_EFFECTSLOT_NULL, send, 0);
     }
-    
+
     @Override
     public void sourceAttachDirectFilter(ALSOFTSource source, ALSOFTFilter filter) {
         AL10.alSourcei(source.sourceId, EXTEfx.AL_DIRECT_FILTER, filter.filterId);
     }
-    
+
     @Override
     public void sourceRemoveDirectFilter(ALSOFTSource source) {
         AL10.alSourcei(source.sourceId, EXTEfx.AL_DIRECT_FILTER, EXTEfx.AL_FILTER_NULL);
     }
-    
+
     @Override
     public ALSOFTEffect effectCreate(int effectType) {
         final ALSOFTEffect fx = new ALSOFTEffect();
-        
+
         fx.effectId = EXTEfx.alGenEffects();
         EXTEfx.alEffecti(fx.effectId, EXTEfx.AL_EFFECT_TYPE, effectType);
         return fx;
     }
-    
+
     @Override
     public void effectDelete(ALSOFTEffect effect) {
-        if(effect.isValid()) {
+        if (effect.isValid()) {
             EXTEfx.alDeleteEffects(effect.effectId);
             effect.effectId = -1;
         }
     }
-    
+
     @Override
     public void effectSetProperty(ALSOFTEffect effect, int name, int value) {
         EXTEfx.alEffecti(effect.effectId, name, value);
     }
-    
+
     @Override
     public void effectSetProperty(ALSOFTEffect effect, int name, float value) {
         EXTEfx.alEffectf(effect.effectId, name, value);
     }
-    
+
     @Override
     public ALSOFTFilter filterCreate(int type) {
         final ALSOFTFilter filter = new ALSOFTFilter();
-        
+
         filter.filterId = EXTEfx.alGenFilters();
         EXTEfx.alFilteri(filter.filterId, EXTEfx.AL_FILTER_TYPE, type);
         return filter;
     }
-    
+
     @Override
     public void filterDelete(ALSOFTFilter filter) {
-        if(filter.isValid()) {
+        if (filter.isValid()) {
             EXTEfx.alDeleteFilters(filter.filterId);
             filter.filterId = -1;
         }
     }
-    
+
     @Override
     public void filterSetProperty(ALSOFTFilter filter, int name, int value) {
         EXTEfx.alFilteri(filter.filterId, name, value);
     }
-    
+
     @Override
     public void filterSetProperty(ALSOFTFilter filter, int name, float value) {
         EXTEfx.alFilterf(filter.filterId, name, value);
@@ -168,21 +168,23 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     @Override
     public ALSOFTDevice deviceCreate() {
         final ALSOFTDevice device = new ALSOFTDevice();
-        
+
         device.handle = ALDevice.create();
         device.caps = device.handle.getCapabilities();
-        
-        final IntBuffer attribs = MemoryUtil.memAllocInt(3);
-        
-        attribs.put(EXTEfx.ALC_MAX_AUXILIARY_SENDS);
-        attribs.put(this.maxAuxiliarySends);
-        attribs.put(0);
-        attribs.flip();
-        
-        device.context = ALContext.create(device.handle, attribs);
 
-        MemoryUtil.memFree(attribs);
-        
+        final IntBuffer attribs = MemoryUtil.memAllocInt(3);
+
+        try {
+            attribs.put(EXTEfx.ALC_MAX_AUXILIARY_SENDS);
+            attribs.put(this.maxAuxiliarySends);
+            attribs.put(0);
+            attribs.flip();
+
+            device.context = ALContext.create(device.handle, attribs);
+        } finally {
+            MemoryUtil.memFree(attribs);
+        }
+
         return device;
     }
 
@@ -240,16 +242,18 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     public void listenerSetOrientation(ALSOFTListener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {
         final FloatBuffer values = MemoryUtil.memAllocFloat(6);
 
-        values.put(0, atX);
-        values.put(1, atY);
-        values.put(2, atZ);
-        values.put(3, upX);
-        values.put(4, upY);
-        values.put(5, upZ);
+        try {
+            values.put(0, atX);
+            values.put(1, atY);
+            values.put(2, atZ);
+            values.put(3, upX);
+            values.put(4, upY);
+            values.put(5, upZ);
 
-        AL10.alListenerfv(AL10.AL_ORIENTATION, values);
-
-        MemoryUtil.memFree(values);
+            AL10.alListenerfv(AL10.AL_ORIENTATION, values);
+        } finally {
+            MemoryUtil.memFree(values);
+        }
     }
 
     @Override
@@ -318,13 +322,16 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     public void sourceSetPosition(ALSOFTSource source, float x, float y, float z) {
         final FloatBuffer values = MemoryUtil.memAllocFloat(3);
 
-        values.put(0, x);
-        values.put(1, y);
-        values.put(2, z);
+        try {
+            values.put(0, x);
+            values.put(1, y);
+            values.put(2, z);
 
-        //AL10.alSource3f(source.sourceId, AL10.AL_POSITION, x, y, z);
-        AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
-        MemoryUtil.memFree(values);
+            //AL10.alSource3f(source.sourceId, AL10.AL_POSITION, x, y, z);
+            AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
+        } finally {
+            MemoryUtil.memFree(values);
+        }
     }
 
     @Override
