@@ -8,9 +8,9 @@ package com.longlinkislong.gloop.alimpl.al10;
 import com.longlinkislong.gloop.alspi.Driver;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.ALContext;
-import org.lwjgl.openal.ALDevice;
+import org.lwjgl.openal.ALC10;
 import org.lwjgl.system.MemoryUtil;
 
 /**
@@ -40,9 +40,19 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     public AL10Device deviceCreate() {
         final AL10Device device = new AL10Device();
 
-        device.handle = ALDevice.create();
-        device.caps = device.handle.getCapabilities();
-        device.context = ALContext.create(device.handle);
+        device.deviceId = ALC10.alcOpenDevice((ByteBuffer) null);
+
+        final IntBuffer attribs = MemoryUtil.memAllocInt(1);
+
+        try {
+            attribs.put(0);
+            attribs.flip();
+
+            device.contextId = ALC10.alcCreateContext(device.deviceId, attribs);
+            ALC10.alcMakeContextCurrent(device.contextId);
+        } finally {
+            MemoryUtil.memFree(attribs);
+        }
 
         return device;
     }
@@ -50,11 +60,10 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     @Override
     public void deviceDelete(AL10Device device) {
         if (device.isValid()) {
-            device.context.destroy();
-            device.context = null;
-            device.caps = null;
-            device.handle.destroy();
-            device.handle = null;
+            ALC10.alcDestroyContext(device.contextId);
+            device.contextId = -1;
+            ALC10.alcCloseDevice(device.deviceId);
+            device.deviceId = -1;
         }
     }
 

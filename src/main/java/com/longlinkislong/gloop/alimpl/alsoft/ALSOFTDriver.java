@@ -11,8 +11,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
-import org.lwjgl.openal.ALContext;
-import org.lwjgl.openal.ALDevice;
+import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.EXTEfx;
 import org.lwjgl.system.MemoryUtil;
 
@@ -169,8 +168,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     public ALSOFTDevice deviceCreate() {
         final ALSOFTDevice device = new ALSOFTDevice();
 
-        device.handle = ALDevice.create();
-        device.caps = device.handle.getCapabilities();
+        device.deviceId = ALC10.alcOpenDevice((ByteBuffer) null);
 
         final IntBuffer attribs = MemoryUtil.memAllocInt(3);
 
@@ -180,7 +178,8 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
             attribs.put(0);
             attribs.flip();
 
-            device.context = ALContext.create(device.handle, attribs);
+            device.contextId = ALC10.alcCreateContext(device.deviceId, attribs);
+            ALC10.alcMakeContextCurrent(device.contextId);
         } finally {
             MemoryUtil.memFree(attribs);
         }
@@ -191,17 +190,17 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     @Override
     public void deviceDelete(ALSOFTDevice device) {
         if (device.isValid()) {
-            device.context.destroy();
-            device.context = null;
-            device.caps = null;
-            device.handle.destroy();
-            device.handle = null;
+            ALC10.alcDestroyContext(device.contextId);
+            device.contextId = -1;
+            ALC10.alcCloseDevice(device.deviceId);
+            device.deviceId = -1;
         }
     }
 
     private static final class Holder {
 
         private static final ALSOFTDriver INSTANCE = new ALSOFTDriver();
+        private Holder() {}
     }
 
     public static ALSOFTDriver getInstance() {
