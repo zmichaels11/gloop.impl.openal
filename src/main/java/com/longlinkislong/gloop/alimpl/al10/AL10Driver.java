@@ -11,7 +11,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC10;
-import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.MemoryStack;
 
 /**
  *
@@ -42,16 +42,11 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
 
         device.deviceId = ALC10.alcOpenDevice((ByteBuffer) null);
 
-        final IntBuffer attribs = MemoryUtil.memAllocInt(1);
-
-        try {
-            attribs.put(0);
-            attribs.flip();
+        try (MemoryStack mem = MemoryStack.stackPush()) {
+            final IntBuffer attribs = mem.ints(0);
 
             device.contextId = ALC10.alcCreateContext(device.deviceId, attribs);
             ALC10.alcMakeContextCurrent(device.contextId);
-        } finally {
-            MemoryUtil.memFree(attribs);
         }
 
         return device;
@@ -70,6 +65,8 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     private static final class Holder {
 
         private static final AL10Driver INSTANCE = new AL10Driver();
+
+        private Holder() {}
     }
 
     public static AL10Driver getInstance() {
@@ -108,19 +105,10 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
 
     @Override
     public void listenerSetOrientation(AL10Listener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {
-        final FloatBuffer values = MemoryUtil.memAllocFloat(6);
-
-        try {
-            values.put(0, atX);
-            values.put(1, atY);
-            values.put(2, atZ);
-            values.put(3, upX);
-            values.put(4, upY);
-            values.put(5, upZ);
+        try (MemoryStack mem = MemoryStack.stackPush()) {
+            final FloatBuffer values = mem.floats(atX, atY, atZ, upX, upY, upZ);
 
             AL10.alListenerfv(AL10.AL_ORIENTATION, values);
-        } finally {
-            MemoryUtil.memFree(values);
         }
     }
 
@@ -188,17 +176,10 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
 
     @Override
     public void sourceSetPosition(AL10Source source, float x, float y, float z) {
-        final FloatBuffer values = MemoryUtil.memAllocFloat(3);
+        try (MemoryStack mem = MemoryStack.stackPush()) {
+            final FloatBuffer values = mem.floats(x, y, z);
 
-        try {
-            values.put(0, x);
-            values.put(1, y);
-            values.put(2, z);
-
-            //AL10.alSource3f(source.sourceId, AL10.AL_POSITION, x, y, z);
             AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
-        } finally {
-            MemoryUtil.memFree(values);
         }
     }
 

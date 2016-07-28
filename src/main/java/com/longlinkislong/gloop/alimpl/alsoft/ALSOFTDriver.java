@@ -15,7 +15,7 @@ import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.EXTEfx;
-import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,23 +181,16 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
         
         LOGGER.trace("Opened ALC device: [{}] handle: [{}]", defaultDevice, device.deviceId);
 
-        final IntBuffer attribs = MemoryUtil.memAllocInt(3);
-
-        try {
-            attribs.put(EXTEfx.ALC_MAX_AUXILIARY_SENDS);
-            attribs.put(this.maxAuxiliarySends);
-            attribs.put(0);
-            attribs.flip();
+        try (MemoryStack mem = MemoryStack.stackPush()) {
+            final IntBuffer attribs = mem.ints(EXTEfx.ALC_MAX_AUXILIARY_SENDS, this.maxAuxiliarySends, 0);
 
             device.contextId = ALC10.alcCreateContext(device.deviceId, attribs);
 
             if(!ALC10.alcMakeContextCurrent(device.contextId)) {
                 LOGGER.error("Initializing OpenAL failed with error: {}", AL10.alGetError());
-            } else {                
+            } else {
                 device.alCaps = AL.createCapabilities(device.alcCaps);
             }
-        } finally {
-            MemoryUtil.memFree(attribs);
         }
 
         return device;
@@ -254,20 +247,11 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     }
 
     @Override
-    public void listenerSetOrientation(ALSOFTListener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {
-        final FloatBuffer values = MemoryUtil.memAllocFloat(6);
-
-        try {
-            values.put(0, atX);
-            values.put(1, atY);
-            values.put(2, atZ);
-            values.put(3, upX);
-            values.put(4, upY);
-            values.put(5, upZ);
-
+    public void listenerSetOrientation(ALSOFTListener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {        
+        try (MemoryStack mem = MemoryStack.stackPush()) {
+            final FloatBuffer values = mem.floats(atX, atY, atZ, upX, upY, upZ);
+            
             AL10.alListenerfv(AL10.AL_ORIENTATION, values);
-        } finally {
-            MemoryUtil.memFree(values);
         }
     }
 
@@ -335,17 +319,10 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
 
     @Override
     public void sourceSetPosition(ALSOFTSource source, float x, float y, float z) {
-        final FloatBuffer values = MemoryUtil.memAllocFloat(3);
-
-        try {
-            values.put(0, x);
-            values.put(1, y);
-            values.put(2, z);
-
-            //AL10.alSource3f(source.sourceId, AL10.AL_POSITION, x, y, z);
+        try (MemoryStack mem = MemoryStack.stackPush()) {
+            final FloatBuffer values = mem.floats(x, y, z);
+            
             AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
-        } finally {
-            MemoryUtil.memFree(values);
         }
     }
 
