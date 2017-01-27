@@ -66,7 +66,8 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
 
         private static final AL10Driver INSTANCE = new AL10Driver();
 
-        private Holder() {}
+        private Holder() {
+        }
     }
 
     public static AL10Driver getInstance() {
@@ -208,5 +209,9 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_INNER_ANGLE, innerAngle);
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_ANGLE, outerAngle);
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_GAIN, outerGain);
+    }
+
+    public int sourceGetState(final AL10Source src) {
+        return AL10.alGetSourcei(src.sourceId, AL10.AL_SOURCE_STATE);
     }
 }

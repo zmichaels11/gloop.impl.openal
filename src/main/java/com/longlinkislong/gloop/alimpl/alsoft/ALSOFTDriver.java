@@ -352,4 +352,8 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_ANGLE, outerAngle);
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_GAIN, outerGain);
     }
+    
+    public int sourceGetState(final ALSOFTSource src) {
+        return AL10.alGetSourcei(src.sourceId, AL10.AL_SOURCE_STATE);
+    }
 }
