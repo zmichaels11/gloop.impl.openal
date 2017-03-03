@@ -95,6 +95,21 @@ final class AL10Driver implements Driver<AL10Device, AL10Buffer, AL10Listener, A
     }
 
     @Override
+    public void bufferSetData(AL10Buffer buffer, int format, short[] data, int frequency) {
+        AL10.alBufferData(buffer.bufferId, format, data, frequency);
+    }
+    
+    @Override
+    public void bufferSetData(AL10Buffer buffer, int format, int[] data, int frequency) {
+        AL10.alBufferData(buffer.bufferId, format, data, frequency);
+    }
+    
+    @Override
+    public void bufferSetData(AL10Buffer buffer, int format, float[] data, int frequency) {
+        AL10.alBufferData(buffer.bufferId, format, data, frequency);
+    }
+    
+    @Override
     public AL10Listener listenerGetInstance() {
         return AL10Listener.Holder.INSTANCE;
     }

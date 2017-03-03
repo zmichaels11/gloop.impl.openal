@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author zmichaels
  */
 final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTListener, ALSOFTSource, ALSOFTAuxiliaryEffectSlot, ALSOFTEffect, ALSOFTFilter> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger("ALSoftDriver");
     private final int maxAuxiliarySends = Integer.getInteger("com.longlinkislong.gloop.alsoftdriver.max_auxiliary_sends", 4);
 
@@ -173,12 +174,11 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     public ALSOFTDevice deviceCreate() {
         final ALSOFTDevice device = new ALSOFTDevice();
 
-
         final String defaultDevice = ALC10.alcGetString(NULL, ALC10.ALC_DEFAULT_DEVICE_SPECIFIER);
-        
+
         device.deviceId = ALC10.alcOpenDevice(defaultDevice);
         device.alcCaps = ALC.createCapabilities(device.deviceId);
-        
+
         LOGGER.trace("Opened ALC device: [{}] handle: [{}]", defaultDevice, device.deviceId);
 
         try (MemoryStack mem = MemoryStack.stackPush()) {
@@ -186,7 +186,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
 
             device.contextId = ALC10.alcCreateContext(device.deviceId, attribs);
 
-            if(!ALC10.alcMakeContextCurrent(device.contextId)) {
+            if (!ALC10.alcMakeContextCurrent(device.contextId)) {
                 LOGGER.error("Initializing OpenAL failed with error: {}", AL10.alGetError());
             } else {
                 device.alCaps = AL.createCapabilities(device.alcCaps);
@@ -209,7 +209,9 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     private static final class Holder {
 
         private static final ALSOFTDriver INSTANCE = new ALSOFTDriver();
-        private Holder() {}
+
+        private Holder() {
+        }
     }
 
     public static ALSOFTDriver getInstance() {
@@ -237,6 +239,21 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     }
 
     @Override
+    public void bufferSetData(ALSOFTBuffer buffer, int format, short[] data, int frequency) {
+        AL10.alBufferData(buffer.bufferId, format, data, frequency);
+    }
+
+    @Override
+    public void bufferSetData(ALSOFTBuffer buffer, int format, int[] data, int frequency) {
+        AL10.alBufferData(buffer.bufferId, format, data, frequency);
+    }
+
+    @Override
+    public void bufferSetData(ALSOFTBuffer buffer, int format, float[] data, int frequency) {
+        AL10.alBufferData(buffer.bufferId, format, data, frequency);
+    }
+
+    @Override
     public ALSOFTListener listenerGetInstance() {
         return ALSOFTListener.Holder.INSTANCE;
     }
@@ -247,10 +264,10 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     }
 
     @Override
-    public void listenerSetOrientation(ALSOFTListener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {        
+    public void listenerSetOrientation(ALSOFTListener listener, float atX, float atY, float atZ, float upX, float upY, float upZ) {
         try (MemoryStack mem = MemoryStack.stackPush()) {
             final FloatBuffer values = mem.floats(atX, atY, atZ, upX, upY, upZ);
-            
+
             AL10.alListenerfv(AL10.AL_ORIENTATION, values);
         }
     }
@@ -321,7 +338,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
     public void sourceSetPosition(ALSOFTSource source, float x, float y, float z) {
         try (MemoryStack mem = MemoryStack.stackPush()) {
             final FloatBuffer values = mem.floats(x, y, z);
-            
+
             AL10.alSourcefv(source.sourceId, AL10.AL_POSITION, values);
         }
     }
@@ -352,7 +369,7 @@ final class ALSOFTDriver implements Driver<ALSOFTDevice, ALSOFTBuffer, ALSOFTLis
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_ANGLE, outerAngle);
         AL10.alSourcef(src.sourceId, AL10.AL_CONE_OUTER_GAIN, outerGain);
     }
-    
+
     public int sourceGetState(final ALSOFTSource src) {
         return AL10.alGetSourcei(src.sourceId, AL10.AL_SOURCE_STATE);
     }
